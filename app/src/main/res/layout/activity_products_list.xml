@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/margin_xxlarge">
+
+    <include
+        android:layout_width="320dp"
+        android:layout_height="400dp"
+        android:id="@+id/in_list"
+        layout="@layout/list_relative"
+        android:visibility="visible"
+        android:layout_gravity="center"/>
+    <include
+        android:id="@+id/in_grid"
+        layout="@layout/grid_relative"
+        android:visibility="gone"
+       />
+
+
+</FrameLayout>

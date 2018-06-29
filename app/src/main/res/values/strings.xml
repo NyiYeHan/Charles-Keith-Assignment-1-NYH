@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">CHARLES &amp; KEITH</string>
+    <string name="product_name">POINTED FLAT MULES</string>
+    <string name="lost_internet">You are offline. Check your Internet connection.</string>
+    <string name="empty_msg">The content is not avaliable now! Check your Internte connection now!!</string>
+    <string name="empty_img_url">https://cdn3.iconfinder.com/data/icons/popular-memes/48/JD-28-512.png</string>
+</resources>
