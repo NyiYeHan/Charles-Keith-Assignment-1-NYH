@@ -1,6 +1,7 @@
 package com.padcmyanmar.charleskeith.network;
 
 import com.padcmyanmar.charleskeith.event.ApiErrorEvent;
+import com.padcmyanmar.charleskeith.event.SuccessForceRefreshGetProductsEvent;
 import com.padcmyanmar.charleskeith.event.SuccessProductsEvent;
 import com.padcmyanmar.charleskeith.network.response.GetProductsResponse;
 import com.padcmyanmar.charleskeith.utils.ProductsConstant;
@@ -47,16 +48,23 @@ public class RetrofitDataAgentImpl implements DataAgent {
     }
 
     @Override
-    public void loadShoesList(int page, String accessToken) {
+    public void loadProductsList(int page, String accessToken, final boolean isForceRefresh) {
 
         Call<GetProductsResponse> getShoesResponseCall = mProductsApi.loadShoesList(page, accessToken);
         getShoesResponseCall.enqueue(new Callback<GetProductsResponse>() {
             @Override
             public void onResponse(Call<GetProductsResponse> call, Response<GetProductsResponse> response) {
                 GetProductsResponse responseObj = response.body();
+
                 if (responseObj != null && responseObj.responseIsOk()) {
-                    SuccessProductsEvent event = new SuccessProductsEvent(responseObj.getProductVos());
-                    EventBus.getDefault().post(event);
+                    if (isForceRefresh) {
+                        SuccessForceRefreshGetProductsEvent event = new SuccessForceRefreshGetProductsEvent(responseObj.getProductVos());
+
+                    } else {
+                        SuccessProductsEvent event = new SuccessProductsEvent(responseObj.getProductVos());
+                        EventBus.getDefault().post(event);
+                    }
+
 
                 } else {
                     if (responseObj == null) {

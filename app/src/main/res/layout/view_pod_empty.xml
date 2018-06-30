@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.padcmyanmar.charleskeith.viewpods.EmptyViewPod xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <ImageView
         android:id="@+id/iv_empty"
-        android:src="@drawable/internet_placeholder"
+        tools:src="@drawable/internet_placeholder"
         android:layout_width="180dp"
         android:layout_height="180dp"
         android:scaleType="centerInside"
@@ -14,7 +16,7 @@
         android:id="@+id/tv_empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/lost_internet"
+        tools:text="@string/lost_internet"
         android:textAllCaps="false"
         android:textSize="@dimen/margin_medium_2"
         android:layout_below="@+id/iv_empty"

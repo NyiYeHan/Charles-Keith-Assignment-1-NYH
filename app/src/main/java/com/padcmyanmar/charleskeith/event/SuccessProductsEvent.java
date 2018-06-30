@@ -15,4 +15,5 @@ public class SuccessProductsEvent {
 
         this.productVos = productVos;
     }
+
 }

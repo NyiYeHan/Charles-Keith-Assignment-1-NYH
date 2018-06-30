@@ -4,21 +4,17 @@ package com.padcmyanmar.charleskeith.activities;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 
 import com.bumptech.glide.Glide;
-import com.padcmyanmar.charleskeith.MainActivity;
 
 import com.padcmyanmar.charleskeith.R;
 import com.padcmyanmar.charleskeith.data.model.ProductsModel;
 import com.padcmyanmar.charleskeith.data.vo.ProductVo;
 import com.padcmyanmar.charleskeith.viewpods.EmptyViewPod;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 
 public class ProductsDetailsActivity extends MainActivity {
@@ -31,6 +27,8 @@ public class ProductsDetailsActivity extends MainActivity {
 
     RelativeLayout relativeLayout;
 
+    TextView tvDetails;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,6 +40,7 @@ public class ProductsDetailsActivity extends MainActivity {
         ivDetails = findViewById(R.id.iv_details);
         vpDetails = findViewById(R.id.vp_details_empty);
         relativeLayout = findViewById(R.id.relativeDetails);
+         tvDetails = findViewById(R.id.tv_details);
 
         String productId = getIntent().getStringExtra("productId");
         ProductVo productVo = ProductsModel.getObj().getProductById(productId);
@@ -64,5 +63,7 @@ public class ProductsDetailsActivity extends MainActivity {
         Glide.with(ivDetails.getContext())
                 .load(productVo.getProduct_image())
                 .into(ivDetails);
+        tvDetails.setText(productVo.getProduct_title());
+
     }
 }

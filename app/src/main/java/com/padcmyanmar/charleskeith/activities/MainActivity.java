@@ -1,20 +1,21 @@
-package com.padcmyanmar.charleskeith;
+package com.padcmyanmar.charleskeith.activities;
 
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 
+import com.padcmyanmar.charleskeith.R;
 import com.padcmyanmar.charleskeith.activities.BaseActivity;
 import com.padcmyanmar.charleskeith.activities.ProductsDetailsActivity;
 import com.padcmyanmar.charleskeith.adapters.ProductsAdapter;
@@ -22,6 +23,7 @@ import com.padcmyanmar.charleskeith.data.model.ProductsModel;
 import com.padcmyanmar.charleskeith.data.vo.ProductVo;
 import com.padcmyanmar.charleskeith.delegates.ProductsDelegate;
 import com.padcmyanmar.charleskeith.event.ApiErrorEvent;
+import com.padcmyanmar.charleskeith.event.SuccessForceRefreshGetProductsEvent;
 import com.padcmyanmar.charleskeith.event.SuccessProductsEvent;
 import com.padcmyanmar.charleskeith.viewpods.EmptyViewPod;
 
@@ -43,7 +45,6 @@ public class MainActivity extends BaseActivity implements ProductsDelegate {
     private ProductsAdapter productsAdapter;
     @BindView(R.id.vp_empty)
     EmptyViewPod vpEmpty;
-    private static final String DUMMY_ACCESS_TOKEN = "b002c7e1a528b7cb460933fc2875e916";
 
 
     @Override
@@ -56,16 +57,26 @@ public class MainActivity extends BaseActivity implements ProductsDelegate {
         recyclerView.setAdapter(productsAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
         /*recyclerView.setLayoutManager(new GridLayoutManager(getApplicationContext(),2));*/
-        ProductsModel.getObj().loadShoesList(1, DUMMY_ACCESS_TOKEN);
+        ProductsModel.getObj().loadProductsList();
 
-        ImageView ivGrid = findViewById(R.id.iv_grid);
+       ImageView ivGrid = findViewById(R.id.iv_grid);
+
+
         ivGrid.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                RelativeLayout grid = findViewById(R.id.in_grid);
-                RelativeLayout list = findViewById(R.id.in_list);
-                grid.setVisibility(View.VISIBLE);
-                list.setVisibility(View.GONE);
+                RelativeLayout relativeGrid = findViewById(R.id.rl_shoes);
+                relativeGrid.getLayoutParams().width = 180;
+                relativeGrid.getLayoutParams().height = 200;
+
+                ImageView ivListNew = findViewById(R.id.iv_list_new);
+                ivListNew.getLayoutParams().width =180;
+                ivListNew.getLayoutParams().height = 170;
+
+                Button btnNews = findViewById(R.id.btn_list);
+                btnNews.getLayoutParams().width=10;
+                btnNews.getLayoutParams().height=20;
+
                 recyclerView.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));
 
             }
@@ -75,10 +86,8 @@ public class MainActivity extends BaseActivity implements ProductsDelegate {
         ivList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                RelativeLayout grid = findViewById(R.id.in_grid);
-                RelativeLayout list = findViewById(R.id.in_list);
-                grid.setVisibility(View.GONE);
-                list.setVisibility(View.VISIBLE);
+
+
                 recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
 
 
@@ -88,20 +97,37 @@ public class MainActivity extends BaseActivity implements ProductsDelegate {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                ProductsModel.getObj().loadShoesList(1, DUMMY_ACCESS_TOKEN);
+                ProductsModel.getObj().forceRefreshProductsList();
             }
         });
         vpEmpty.setEmptyData(R.drawable.internet_placeholder, getString(R.string.lost_internet));
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            private boolean isListItemRead = true;
+
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE &&
+                        ((LinearLayoutManager) recyclerView.getLayoutManager())
+                                .findLastCompletelyVisibleItemPosition() ==
+                                recyclerView.getAdapter().getItemCount() - 1
+                        && !isListItemRead) {
+                    ProductsModel.getObj().loadProductsList();
+                }
             }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+                int visibleItemCount = recyclerView.getLayoutManager().getChildCount();
+                int totalItemCount = recyclerView.getLayoutManager().getItemCount();
+                int pastVisibleItem = ((LinearLayoutManager) recyclerView.getLayoutManager())
+                        .findFirstVisibleItemPosition();
+                if (visibleItemCount + pastVisibleItem < totalItemCount) {
+                    isListItemRead = false;
+                }
+
             }
         });
 
@@ -121,17 +147,28 @@ public class MainActivity extends BaseActivity implements ProductsDelegate {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onSuccessGetShoes(SuccessProductsEvent event) {
+    public void onSuccessGetProducts(SuccessProductsEvent event) {
         swipeRefreshLayout.setRefreshing(false);
-        productsAdapter.setShoesList(event.getProductVos());
-        vpEmpty.setVisibility(View.INVISIBLE);
+        if (event.getProductVos() != null) {
+            productsAdapter.appendProductsList(event.getProductVos());
+
+        }
+
+    }
+
+    public void onSuccessForceRefreshGetProducts(SuccessForceRefreshGetProductsEvent event) {
+        swipeRefreshLayout.setRefreshing(false);
+        productsAdapter.setProductsList(event.getProductVos());
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onApiErrorEvent(ApiErrorEvent event) {
-        swipeRefreshLayout.setRefreshing(false);
-        Snackbar.make(swipeRefreshLayout, event.getErrorMsg(), Snackbar.LENGTH_INDEFINITE).show();
-        vpEmpty.setVisibility(View.VISIBLE);
+        if (!event.getErrorMsg().contains("success")) {
+            swipeRefreshLayout.setRefreshing(false);
+            Snackbar.make(swipeRefreshLayout, event.getErrorMsg(), Snackbar.LENGTH_INDEFINITE).show();
+            vpEmpty.setVisibility(View.VISIBLE);
+        }
 
 
     }

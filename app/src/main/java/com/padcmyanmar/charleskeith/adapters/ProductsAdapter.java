@@ -44,8 +44,12 @@ public class ProductsAdapter extends RecyclerView.Adapter <ProductsViewHolder>{
         return shoesList.size();
     }
 
-    public void setShoesList(List<ProductVo> shoesList) {
+    public void setProductsList(List<ProductVo> shoesList) {
         this.shoesList = shoesList;
+        notifyDataSetChanged();
+    }
+    public void appendProductsList(List<ProductVo> poductList){
+        this.shoesList.addAll(poductList);
         notifyDataSetChanged();
     }
 }
